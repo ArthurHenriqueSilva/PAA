@@ -1,19 +1,38 @@
-//
 #include <stdio.h>
+#include <stdlib.h>
+
+typedef struct {
+    char code[12];
+    char cnpj[18];
+    int weight;
+} Container;
+
+void printContainer(Container *container, int i){
+    printf("Container %d: Code: %s CNPJ: %s Weight: %d\n", i+1, container->code, container->cnpj, container->weight);
+}
+
+void printContainers(Container *containers, int quant){
+    for(int i = 0; i < quant; i++){
+        printContainer(&containers[i], i);
+    }
+}
+
+void fillContainers(FILE *input, Container *containers, int times){
+    for(int i = 0; i < times; i++){
+        fscanf(input, "%s %s %d", containers[i].code, containers[i].cnpj, &containers[i].weight);
+    }
+}
 
 int main(int argc, char *argv[]){
     FILE *input = fopen(argv[1], "r");
-    int quant_lines;
-    char input_code[12];
-    char input_cnpj[18];
-    int input_weight;
 
+    int quant_lines;
     fscanf(input, "%d", &quant_lines);
 
-    for(int i = 0; i < quant_lines; i++){
-        fscanf(input, "%s %s %d", input_code, input_cnpj, &input_weight);
-        printf("%s %s %d\n", input_code, input_cnpj, input_weight);
-    }
-    // printf("%d\n", quant_lines);
+    Container *containers = (Container *)malloc(quant_lines * sizeof(Container));
+    fillContainers(input, containers, quant_lines);
+    printContainers(containers, quant_lines); 
+    free(containers);
     fclose(input);
+    return 0;
 }
