@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <string.h>
 
 typedef struct {
@@ -8,6 +7,19 @@ typedef struct {
     char cnpj[18];
     int weight;
 } Container;
+
+typedef struct {
+    int precedence;
+    char code[12];
+    char cnpj1[18];
+    char cnpj2[18];
+    int diff;
+    float percent;
+} Erro;
+
+int my_round(float x){
+    return (int)(x + 0.5);
+} 
 
 int compare_strings(const char *s1, const char *s2 ){
     while (*s1 != '\0' && *s2 != '\0'){
@@ -47,33 +59,31 @@ Container *create_vector_containers(int quant, FILE *input){
     return cont;
 }
 
-void aux_survey_container(Container container, Container *containers, int size_containers){
+Erro *aux_survey_container(Container container, Container *containers, int size_containers){
+    Erro *erros = (Erro *)malloc(size_containers * sizeof(Container));
+    int erro_index = 0;
     for(int i = 0; i < size_containers; i++){
         if(compare_strings(container.code, containers[i].code)){
-            
-            if(compare_strings(container.cnpj, containers[i].cnpj)){
-                printf("diverge cnpj\n");
-                printf("Informações do Container Atual:\n");
-                printf("    CNPJ: %s\n", container.cnpj);
-                printf("    Peso: %d\n", container.weight);
-
-                printf("Informações do Container Comparado:\n");
-                printf("    CNPJ: %s\n", containers[i].cnpj);
-                printf("    Peso: %d\n", containers[i].weight);
+            if (!(compare_strings(container.cnpj, containers[i].cnpj))){
+                erros[erro_index].precedence = 0;
+                erros[erro_index].code = container.code;
+                erros[erro_index].cnpj1 = container.cnpj;
+                erros[erro_index].cnpj2 = containers[i].cnpj;
+                erro_index++;
+                printf("%s: %s <-> %s\n", container.code, container.cnpj, containers[i].cnpj);
+                continue;
             }
-            int diff_weight = container.weight - containers[i].weight;
-            diff_weight = diff_weight < 0 ? (-diff_weight):diff_weight;
-            int percent = round(diff_weight/containers[i].weight);
-            if(percent > 10){
-                printf("weight error\n");
-                printf("Informações do Container Atual:\n");
-                printf("    CNPJ: %s\n", container.cnpj);
-                printf("    Peso: %d\n", container.weight);
+            int diff = container.weight - containers[i].weight;
+            float percent = (float)diff / containers[i].weight;
+            percent *= 100;
+            percent = my_round(percent);
+            if (percent > 10){
+                erros[erro_index].code = 1;
+                erros[erro_index].code = container.code;
+                erros[erro_index].diff = diff;
+                erros[erro_index].percent = percent;
 
-                printf("Informações do Container Comparado:\n");
-                printf("    CNPJ: %s\n", containers[i].cnpj);
-                printf("    Peso: %d\n", containers[i].weight);
-            }
+            } printf("%s: %dkg (%.0f%%)\n", container.code, diff, percent);
 
         }
 
@@ -92,10 +102,10 @@ int main(int argc, char *argv[]){
     int number_lines_1 = read_number(input);
     
     Container *containers = create_vector_containers(number_lines_1, input);
-    printContainers(containers, number_lines_1);
+    // printContainers(containers, number_lines_1);
     int number_lines_2 = read_number(input);
     Container *containers_2 = create_vector_containers(number_lines_2, input);
-    printContainers(containers_2, number_lines_2);
+    // printContainers(containers_2, number_lines_2);
     survey_containers(containers_2, number_lines_2, containers, number_lines_1);
 
     free(containers);
