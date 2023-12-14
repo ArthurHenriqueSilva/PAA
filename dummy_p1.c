@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 typedef struct {
     char code[12];
@@ -46,13 +45,6 @@ void printContainer(Container *container, int i) {
     printf("Container %d: Code: %s CNPJ: %s Weight: %d\n", i + 1, container->code, container->cnpj, container->weight);
 }
 
-void printContainers(Container *containers, int quant) {
-    for (int i = 0; i < quant; i++) {
-        printContainer(&containers[i], i);
-    }
-    printf("\n");
-}
-
 void fillContainers(FILE *input, Container *containers, int times) {
     for (int i = 0; i < times; i++) {
         fscanf(input, "%s %s %d", containers[i].code, containers[i].cnpj, &containers[i].weight);
@@ -75,12 +67,10 @@ Error define_Error(Container container1, Container container2) {
         int diff = container1.weight - container2.weight;
         this_error.diff = diff < 0 ? -diff : diff;
         this_error.percent = my_round(((float)this_error.diff / (float)container1.weight) * 100);
-
     }
 
     return this_error;
 }
-
 
 Error *find_sameCode_containers(Container *container1, int nl1, Container *container2, int nl2, int *num_errors) {
     Error *errors = (Error *)malloc(nl1 * sizeof(Error));
@@ -98,23 +88,22 @@ Error *find_sameCode_containers(Container *container1, int nl1, Container *conta
 
 void printErrors(Error *errors, int num_errors) {
     for (int i = 0; i < num_errors; i++) {
-        printf("Error %d: Code: %s Precedence: %d ", i+1, errors[i].code,errors[i].precedence);
-
+        printf("Error %d: Code: %s Precedence: %d ", i + 1, errors[i].code, errors[i].precedence);
 
         if (errors[i].precedence == 1) {
             printf("Diff: %d Percent: %0.f%%", errors[i].diff, errors[i].percent);
         } else {
             printf("CNPJ1: %s CNPJ2: %s ",
-               errors[i].cnpj1, errors[i].cnpj2);
+                   errors[i].cnpj1, errors[i].cnpj2);
         }
         printf("\n");
     }
 }
 
-
 void freeErrors(Error *errors) {
     free(errors);
 }
+
 
 int main(int argc, char *argv[]) {
     FILE *input = fopen(argv[1], "r");
