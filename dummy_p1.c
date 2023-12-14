@@ -1,3 +1,6 @@
+// To compile: gcc  dummy_p1.c -o dummy_p1
+// To execute: ./dummy_p1 text.txt
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -31,7 +34,7 @@ int main(int argc, char *argv[]){
 
     Container *containers = (Container *)malloc(quant_lines * sizeof(Container));
     fillContainers(input, containers, quant_lines);
-    printContainers(containers, quant_lines); 
+    // printContainers(containers, quant_lines); 
     free(containers);
     fclose(input);
     return 0;
