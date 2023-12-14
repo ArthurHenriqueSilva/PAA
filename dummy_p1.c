@@ -1,6 +1,3 @@
-// To compile: gcc  dummy_p1.c -o dummy_p1
-// To execute: ./dummy_p1 text.txt
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -102,12 +99,15 @@ void survey_containers(Container *containers_2, int size_containers_2, Container
 int main(int argc, char *argv[]){
     FILE *input = fopen(argv[1], "r");
 
-    int quant_lines;
-    fscanf(input, "%d", &quant_lines);
+    int number_lines_1 = read_number(input);
+    
+    Container *containers = create_vector_containers(number_lines_1, input);
+    // printContainers(containers, number_lines_1);
+    int number_lines_2 = read_number(input);
+    Container *containers_2 = create_vector_containers(number_lines_2, input);
+    // printContainers(containers_2, number_lines_2);
+    survey_containers(containers_2, number_lines_2, containers, number_lines_1);
 
-    Container *containers = (Container *)malloc(quant_lines * sizeof(Container));
-    fillContainers(input, containers, quant_lines);
-    printContainers(containers, quant_lines); 
     free(containers);
     fclose(input);
     return 0;
