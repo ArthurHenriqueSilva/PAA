@@ -86,6 +86,7 @@ int define_error(Container c1, Container c2, int* percent, int* diff){
     *diff = *diff < 0 ? (-*diff):*diff;
     *percent = my_round(((float)*diff / (float)c1.weight) * 100);
     if (*percent > 10) return 1;
+    return 2
     
 }
 
