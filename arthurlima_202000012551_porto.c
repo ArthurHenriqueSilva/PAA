@@ -1,20 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define CODE_LENGTH 12
+#define CNPJ_LENGTH 18
+
 typedef struct {
-    char code[12];
-    char cnpj[18];
+    char code[CODE_LENGTH];
+    char cnpj[CNPJ_LENGTH];
     int weight;
 } Container;
 
 typedef struct {
-    char code[12];
-    char cnpj1[18];
-    char cnpj2[18];
-} CNPJ_Error;
-
-typedef struct {
-    char code[12];
+    char code[CODE_LENGTH];
     int diff;
     int percent;
 
@@ -69,11 +66,6 @@ Container *create_vector_containers(int quant, FILE *input) {
     return cont;
 }
 
-CNPJ_Error *create_vector_cnpj(int quant){
-    CNPJ_Error *cnpj_q = (CNPJ_Error *)malloc(quant * sizeof(CNPJ_Error));
-    return cnpj_q;
-}
-
 
 WEIGHT_Error *create_vector_weight(int quant){
     WEIGHT_Error *weight_q = (WEIGHT_Error *)malloc(quant * sizeof(WEIGHT_Error));
@@ -109,6 +101,7 @@ void find_same_code(Container *c1, int n1, Container *c2, int n2, WEIGHT_Error *
                 break;
             }
         }
+        printf("%d", i);
     }
 }
 
