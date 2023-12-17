@@ -93,6 +93,7 @@ int define_error(Container c1, Container c2, int* percent, int* diff){
 void find_same_code(Container *c1, int n1, Container *c2, int n2, CNPJ_Error *cnpj_q, WEIGHT_Error *weight_q) {
     for (int i = 0; i < n1; i++) {
         for (int j = 0; j < n2; j++) {
+            printf("i=%d j=%d\n", i, j);
             if(!compare_strings(c1[i].code, c2[j].code)) {
                 int percent, diff;
                 int error_code = define_error(c1[i], c2[j], &percent, &diff);
@@ -102,7 +103,6 @@ void find_same_code(Container *c1, int n1, Container *c2, int n2, CNPJ_Error *cn
                     copy_string(cnpj_q->cnpj1, c1[i].cnpj);
                     copy_string(cnpj_q->cnpj2, c2[j].cnpj);
                     cnpj_q++;
-                    continue;
                 }
                 if (error_code == 1) {
                     copy_string(weight_q->code, c1[i].code);
@@ -110,6 +110,7 @@ void find_same_code(Container *c1, int n1, Container *c2, int n2, CNPJ_Error *cn
                     weight_q->diff = diff;
                     weight_q++;
                 }
+                break;
             }
         }
     }
