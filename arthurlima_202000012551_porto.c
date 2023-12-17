@@ -90,19 +90,15 @@ int define_error(Container c1, Container c2, int* percent, int* diff){
     
 }
 
-void find_same_code(Container *c1, int n1, Container *c2, int n2, CNPJ_Error *cnpj_q, WEIGHT_Error *weight_q) {
+void find_same_code(Container *c1, int n1, Container *c2, int n2, WEIGHT_Error *weight_q, FILE *output) {
     for (int i = 0; i < n1; i++) {
         for (int j = 0; j < n2; j++) {
-            printf("i=%d j=%d\n", i, j);
             if(!compare_strings(c1[i].code, c2[j].code)) {
                 int percent, diff;
                 int error_code = define_error(c1[i], c2[j], &percent, &diff);
                 
                 if (!error_code) {
-                    copy_string(cnpj_q->code, c1[i].code);
-                    copy_string(cnpj_q->cnpj1, c1[i].cnpj);
-                    copy_string(cnpj_q->cnpj2, c2[j].cnpj);
-                    cnpj_q++;
+                    fprintf(output, "%s: %s<->%s\n", c1[i].code, c1[i].cnpj, c2[i].cnpj);
                 }
                 if (error_code == 1) {
                     copy_string(weight_q->code, c1[i].code);
@@ -117,13 +113,6 @@ void find_same_code(Container *c1, int n1, Container *c2, int n2, CNPJ_Error *cn
 }
 
 
-void printCNPJErrors(FILE *output, CNPJ_Error *cnpj_q, int n) {
-    for (int i = 0; i < n; i++) {
-        if (cnpj_q[i].code[0] != '\0' && cnpj_q[i].cnpj1[0] != '\0' && cnpj_q[i].cnpj2[0] != '\0') {
-            fprintf(output, "%s: %s<->%s\n", cnpj_q[i].code, cnpj_q[i].cnpj1, cnpj_q[i].cnpj2);
-        }
-    }
-}
 
 void printWeightErrors(FILE *output, WEIGHT_Error *weight_q, int n) {
     for (int i = 0; i < n; i++) {
@@ -144,17 +133,15 @@ int main(int argc, char *argv[]) {
     int number_lines_2 = read_number(input);
     Container *containers_2 = create_vector_containers(number_lines_2, input);
 
-    CNPJ_Error *cnpj_q = create_vector_cnpj(number_lines_2);
     WEIGHT_Error *weight_q = create_vector_weight(number_lines_2);
 
-    find_same_code(containers, number_lines_1, containers_2, number_lines_2, cnpj_q, weight_q);
+    find_same_code(containers, number_lines_1, containers_2, number_lines_2, weight_q, output);
 
-    printCNPJErrors(output, cnpj_q, number_lines_2);
+
     printWeightErrors(output, weight_q, number_lines_2);
 
     free(containers);
     free(containers_2);
-    free(cnpj_q);
     free(weight_q);
     fclose(input);
 
