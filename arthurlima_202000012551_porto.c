@@ -121,9 +121,11 @@ int main(int argc, char *argv[]) {
     FILE *output = fopen(argv[2], "w");
 
     int number_lines_1 = read_number(input);
+    printf("container 1 possui %d linhas.\n", number_lines_1);
     Container *containers = create_vector_containers(number_lines_1, input);
 
     int number_lines_2 = read_number(input);
+    printf("container 2 possui %d linhas.\n", number_lines_2);
     Container *containers_2 = create_vector_containers(number_lines_2, input);
 
     WEIGHT_Error *weight_q = create_vector_weight(number_lines_2);
