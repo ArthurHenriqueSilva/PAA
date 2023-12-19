@@ -93,10 +93,11 @@ void find_same_code(Container *c1, int n1, Container *c2, int n2, WEIGHT_Error *
                     fprintf(output, "%s: %s<->%s\n", c1[i].code, c1[i].cnpj, c2[j].cnpj);
                 }
                 if (error_code == 1) {
-                    copy_string(weight_q->code, c1[i].code);
-                    weight_q->percent = percent;
-                    weight_q->diff = diff;
-                    weight_q++;
+                    fprintf(output, "%s: %dkg (%d%%)\n", c1[i].code, diff, percent);
+                    // copy_string(weight_q->code, c1[i].code);
+                    // weight_q->percent = percent;
+                    // weight_q->diff = diff;
+                    // weight_q++;
                 }
                 break;
             }
