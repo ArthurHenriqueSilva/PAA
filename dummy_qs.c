@@ -21,20 +21,28 @@ int read_number(FILE *file){
     return x;
 }
 
-int fill_vector(FILE *file, int size, int *v){
+int find_median_3(int x, int y, int z){
+    int min, max;
+    min = (x < y) ? x : y;
+    min = (z < min) ? z : min;
+    max = (x > y) ? x : y;
+    max = (z > max) ? z : max;
+    return (x + y + z - min - max);
+}
+
+void fill_vector(FILE *file, int size, int *v){
     for(int i = 0; i < size; i++) fscanf(file, "%d", &v[i]);
 }
 
 void print_vector(int *v, int size){
     for(int i = 0; i < size; i++) printf("%d ", v[i]);
+    printf("\n");
 }
 
-int lomuto(int *v, int i, int j, Counters *counters){
-    int p = v[j], x = i - 1, y = i;
+int lp(int *v, int i, int j, Counters *counters){
+    int piv = v[j], x = i - 1, y;
     for(y = i; y < j; y++) 
-        if (v[y] <= p) 
-            swap(&v[++x], &v[y], counters);
-
+        if (v[y] <= piv)  swap(&v[++x], &v[y], counters);
     swap(&v[++x], &v[j], counters);
     return x;
 }
@@ -42,10 +50,17 @@ int lomuto(int *v, int i, int j, Counters *counters){
 void lp_qs(int *v, int i, int j, Counters *counters){
     counters->calls++;
     if(i < j){
-        int pivo = lomuto(v, i, j, counters);
+        int pivo = lp(v, i, j, counters);
         lp_qs(v, i, pivo - 1, counters);
         lp_qs(v, pivo + 1, j, counters);
     }
+}
+
+int lm(int *v, int i, int j, Counters *counters) {
+    return 0;
+}
+
+void lm_qs(int *v, int i, int j, Counters *counters) {
 }
 
 void print_counters(const char *label, Counters counters){
@@ -66,13 +81,18 @@ int main(int argc, char *argv[]){
         fill_vector(input, size, v);
 
         printf("%d: N (%d) ", i, size);
-
-        // Lomuto Padrão (LP)
+        // lp Padrão (LP)
         Counters lp_counters = counters;
         lp_qs(v, 0, size - 1, &lp_counters);
         print_counters("LP", lp_counters);
-
+        
+        // LM
+        // Counters lm_counters = counters;
+        // lm_qs(v, 0, size - 1, &lm_counters);
+        // print_counters("LM", lm_counters);
         printf("\n");
+
+        print_vector(v, size);
     }
 
     return 0;
