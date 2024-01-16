@@ -23,9 +23,6 @@ int read_number(FILE *file){
     return x;
 }
 
-int my_rand(int *v, int ini, int n){
-    return 0;
-}
 
 // median methods
 // OK
@@ -39,21 +36,13 @@ int find_median_3(int x, int y, int z){
     return (median);
 }
 int find_median_index(int *v, int i, int j){
-    int n = j - i + 1, x = v[i + n/4], y = v[i + n/2], z = v[i + 3*n/4];
+    int n = j - i + 1, x = v[n/4], y = v[n/2], z = v[3*n/4];
     int median, index;
     median = find_median_3(x,y,z);
-    if (median == x) index = i + n/4;
-    else if (median == y) index = i + n /2;
-    else index = i + 3*n/4;
-
-    int mid = (i + j) / 2;
-    for(int k = i; k <= j; ++k) {
-        if(v[k] == median){
-            if(abs(k - mid) < abs(index - mid)) index = k;
-        }
-    }
+    if (median == x) index = n/4;
+    else if (median == y) index = n/2;
+    else index = 3*n/4;
     return index;
- 
 }
 
 // Print and Fill methods
@@ -107,7 +96,7 @@ void lp_qs(int *v, int i, int j, Counters *counters){
 }
 
 int lm(int *v, int i, int j, Counters *counters) {
-    int median_index, n;
+    int median_index;
     median_index = find_median_index(v, i, j);
     swap(&v[j], &v[median_index], counters);
     return lp(v, i, j, counters);
@@ -122,17 +111,17 @@ void lm_qs(int *v, int i, int j, Counters *counters) {
     }
 }
 
-
+// OK
 int lr(int *v, int i, int j, Counters *counters){
-    swap(&v[j], &v[i+(rand() % (j - i + 1))], counters);
+    swap(&v[j], &v[i+abs(v[i]) % (j - i + 1)], counters);
     return lp(v, i, j, counters);
 }
-
+// OK
 void lr_qs(int *v, int i, int j, Counters *counters){
     counters->calls++;
     if(i < j){
         int pivo = lr(v, i, j, counters);
-        lr_qs(v, i, pivo, counters);
+        lr_qs(v, i, pivo-1, counters);
         lr_qs(v, pivo + 1, j, counters);
     }
 }
@@ -163,7 +152,7 @@ void hm_qs(int*v, int i, int j, Counters *counters){}
 
 
 int hr(int *v, int i, int j, Counters *counters){
-    swap(&v[j], &v[i+(rand() % (j - i + 1))], counters);
+    swap(&v[j], &v[i+abs(v[i]) % (j - i + 1)], counters);
     return hp(v, i, j, counters);
 }
 void hr_qs(int*v, int i, int j, Counters *counters){
@@ -216,27 +205,29 @@ int main(int argc, char *argv[]){
         fill_vectors(input, size, v1, v2, v3, v4, v5, v6);
         // print_vectors(v1,v2,v3,v4,v5, v6, size);
 
-        printf("%d: N(%d) ", i, size);
-        // // // lp Padrão (LP) - Passa no input de exemplo
-        lp_qs(v1, 0, real_size, &lp_counters);
-        print_counters("LP", lp_counters);
+        // printf("%d: N(%d) ", i, size);
+        // lp Padrão (LP) - Passa no input de exemplo
+        // lp_qs(v1, 0, real_size, &lp_counters);
+        // print_counters("LP", lp_counters);
         
         // LM - ordena, erra a contagem
-        // print_vector(v2, size);
+        print_vector(v2, size);
+        printf("\n");
         lm_qs(v2, 0, real_size, &lm_counters);
         print_counters("LM", lm_counters);
+        print_vector(v2, size);
 
-        // // LR - Ordena mas falta implementar o rand
-        lr_qs(v3, 0, real_size, &lr_counters);
-        print_counters("LA", lr_counters);
+        // LR - Ordena mas falta implementar o rand
+        // lr_qs(v3, 0, real_size, &lr_counters);
+        // print_counters("LA", lr_counters);
 
-        // // Hoare Padrao(HP) - Passa no input de exemplo
-        hp_qs(v4, 0, real_size, &hp_counters);
-        print_counters("HP", hp_counters);
+        // Hoare Padrao(HP) - Passa no input de exemplo
+        // hp_qs(v4, 0, real_size, &hp_counters);
+        // print_counters("HP", hp_counters);
 
-        // // Hoare Aleatorio
-        hr_qs(v5, 0, real_size, &hr_counters);
-        print_counters("HA", hr_counters);
+        // Hoare Aleatorio
+        // hr_qs(v5, 0, real_size, &hr_counters);
+        // print_counters("HA", hr_counters);
 
         // Hm - Falta fazer a funcao hm_qs
         // hm_qs(v6, 0, real_size, &hm_counters);
