@@ -1,17 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct {
     int swaps;
     int calls;
+    char label[3];
 } Counters;
 
-Counters init_Counters() {
+Counters init_Counters(const char *label) {
     Counters newCounters;
     newCounters.swaps = 0;
     newCounters.calls = 0;
+    strncpy(newCounters.label, label, sizeof(newCounters.label) - 1);
+    newCounters.label[sizeof(newCounters.label) - 1] = '\0';
+    
     return newCounters;
 }
+
 
 void swap(int *x, int *y, Counters *counters){
     int temp = *x;
@@ -31,7 +37,7 @@ void print_counters(const char *label, Counters counters){
 }
 
 int find_median_index(int *v, int i, int j){
-    int n = j - i + 1, a = n/4, b = n/2, c = 3*n/4, min, max, median;
+    int n = j - i + 1, a = n/4, b = n/2, c = 3*n/4, median;
     median = v[a];
     int median_idx = a;
 
@@ -85,7 +91,6 @@ void print_vectors(int *v1, int *v2, int *v3, int *v4, int *v5, int *v6, int siz
 void lomuto_quicksort(int *v, int i, int j, int method, Counters *counters){
     counters->calls++;
     if(i < j){
-        int pivo, y = i, x =  i - 1;
         if (method == 0) {
             swap(&v[j], &v[i+abs(v[i]) % (j - i + 1)], counters);
         }
@@ -93,7 +98,7 @@ void lomuto_quicksort(int *v, int i, int j, int method, Counters *counters){
             int median_index = find_median_index(v, i, j);
             swap(&v[j], &v[median_index], counters);
         }
-        pivo = v[j];
+        int pivo = v[j], y = i, x =  i - 1;
         for(y = i; y < j; y++) 
             if (v[y] <= pivo)  swap(&v[++x], &v[y], counters);
         swap(&v[++x], &v[j], counters);
@@ -102,56 +107,119 @@ void lomuto_quicksort(int *v, int i, int j, int method, Counters *counters){
         lomuto_quicksort(v, pivo + 1, j, method, counters);
     }
 }
-// 0=HM, 1=HA, 2=HP
+// 0=HA, 1=HM, 2=HP
 void hoare_quicksort(int *v, int i, int j, int method, Counters *counters){
     counters->calls++;
     if(i < j){
-        int pivo;
-        int x = i - 1;
-        int y = j + 1;
         if (method == 0) {
-            swap(&v[j], &v[i+abs(v[i]) % (j - i + 1)], counters);
+            swap(&v[i], &v[i+abs(v[i]) % (j - i + 1)], counters);
         }
         else if(method == 1){
-            
+            int median_index = find_median_index(v, i, j);
+            swap(&v[i], &v[median_index], counters);
         }
-        pivo = v[i];
-        for(y = i; y < j; y++) 
-            if (v[y] <= pivo)  swap(&v[++x], &v[y], counters);
-        swap(&v[++x], &v[j], counters);
-        pivo = x;
-
-        hoare_quicksort(v, i, pivo - 1, method, counters);
+        int pivo = v[i];
+        int x = i - 1;
+        int y = j + 1;
+        while(1){
+            while(v[--y] > pivo);
+            while(v[++x] < pivo);
+            if (x < y) swap(&v[x], &v[y], counters);
+            else {
+                pivo = y;
+                break;
+            }
+        }
+        hoare_quicksort(v, i, pivo, method, counters);
         hoare_quicksort(v, pivo + 1, j, method, counters);
 
     }
 }
 
+void merge(Counters counters_array[], int l, int m, int r) {
+    int i, j, k;
+    int n1 = m - l + 1;
+    int n2 = r - m;
+    Counters L[n1], R[n2];
+    for (i = 0; i < n1; i++)
+        L[i] = counters_array[l + i];
+    for (j = 0; j < n2; j++)
+        R[j] = counters_array[m + 1 + j];
+    i = 0;
+    j = 0;
+    k = l;
+    while (i < n1 && j < n2) {
+        int sum1 = L[i].swaps + L[i].calls;
+        int sum2 = R[j].swaps + R[j].calls;
+
+        if (sum1 <= sum2) {
+            counters_array[k] = L[i];
+            i++;
+        } else {
+            counters_array[k] = R[j];
+            j++;
+        }
+        k++;
+    }
+    while (i < n1) {
+        counters_array[k] = L[i];
+        i++;
+        k++;
+    }
+    while (j < n2) {
+        counters_array[k] = R[j];
+        j++;
+        k++;
+    }
+}
+void merge_sort(Counters counters_array[], int l, int r) {
+    if (l < r) {
+        int m = l + (r - l) / 2;
+        merge_sort(counters_array, l, m);
+        merge_sort(counters_array, m + 1, r);
+        merge(counters_array, l, m, r);
+    }
+}
+
+
 int main(int argc, char *argv[]){
     FILE *input = fopen(argv[1], "r");
+    FILE *output = fopen(argv[2], "w");
     int quant_vector = read_number(input);
+    Counters counters_array[6];
     for(int i = 0; i < quant_vector; i++) {
         int size = read_number(input);
         int real_size = size - 1;
         int v1[size], v2[size], v3[size], v4[size], v5[size], v6[size];
         fill_vectors(input, size, v1,v2,v3,v4,v5,v6);
         
-        Counters lp_counters = init_Counters();
-        Counters la_counters = init_Counters();
-        Counters lm_counters = init_Counters();
-        Counters hp_counters = init_Counters();
-        Counters ha_counters = init_Counters();
-        Counters hm_counters = init_Counters();
-
-        printf("%d: N(%d) ", i, size);
+        Counters lp_counters = init_Counters("LP");
+        Counters la_counters = init_Counters("LA");
+        Counters lm_counters = init_Counters("LM");
+        Counters hp_counters = init_Counters("HP");
+        Counters ha_counters = init_Counters("HA");
+        Counters hm_counters = init_Counters("HM");
         lomuto_quicksort(v1,0, real_size, 2, &lp_counters);
-        print_counters("LP", lp_counters);
         lomuto_quicksort(v2, 0, real_size, 0, &la_counters);
-        print_counters("LA", la_counters);
         lomuto_quicksort(v3, 0, real_size, 1, &lm_counters);
-        print_counters("LM", lm_counters);
+        hoare_quicksort(v4, 0, real_size, 2, &hp_counters);
+        hoare_quicksort(v5, 0, real_size, 0, &ha_counters);
+        hoare_quicksort(v6, 0, real_size, 1, &hm_counters);
 
-        printf("\n");
-       
+        counters_array[0] = lp_counters;
+        counters_array[1] = la_counters;
+        counters_array[2] = lm_counters;
+        counters_array[3] = hp_counters;
+        counters_array[4] = ha_counters;
+        counters_array[5] = hm_counters;
+
+        merge_sort(counters_array, 0, 5);
+        fprintf(output, "%d: N(%d) ", i, size);
+        for (int j = 0; j < 6; j++)
+            fprintf(output, "%s (%d) ", counters_array[j].label, counters_array[j].swaps + counters_array[j].calls);
+        fprintf(output, "\n");
     }
+    fclose(input);
+    fclose(output);
+    return 0;
 }

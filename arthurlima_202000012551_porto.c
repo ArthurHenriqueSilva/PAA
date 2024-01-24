@@ -163,12 +163,12 @@ void merge2(Weight_error *arr, int left, int mid, int right) {
     j = 0;
     k = left;
     while (i < n1 && j < n2) {
-        if (L[i].percent <= R[j].percent) {
-            arr[k] = L[i];
-            i++;
-        } else {
-            arr[k] = R[j];
+        if (L[i].percent >= R[j].percent) {
+            arr[k] = L[j];
             j++;
+        } else {
+            arr[k] = R[i];
+            i++;
         }
         k++;
     }
@@ -237,7 +237,6 @@ void search_container(Container *c1, int n1, Container *c2, int n2, FILE *output
                 q[w_index].percent = percent;
                 q[w_index].diff = diff;
                 w_index++;
-                // fprintf(output, "%s: %dkg (%d%%)\n", c1[i].code, diff, percent);
             }
         }
 
@@ -266,7 +265,7 @@ int main(int argc, char *argv[]) {
     search_container(container_1, size_1, container_2, size_2, output, w_q);
     mergeSort2(w_q, 0, size_2-1);
     for (int i = 0; i < size_2; i++) {
-        if (w_q[i].percent != 0) {
+        if (w_q[i].percent > 10) {
             fprintf(output, "%s: %dkg (%d%%)\n", w_q[i].code, w_q[i].diff, w_q[i].percent);
         }
     }
