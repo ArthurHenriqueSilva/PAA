@@ -148,13 +148,14 @@ void search_container(Container *c1, int n1, Container *c2, int n2, FILE *output
         }
     }
 }
+
 int main(int argc, char *argv[]){
     printf("Started!");
     // FIle opening
     FILE *input = fopen(argv[1], "r");
     FILE *output = fopen(argv[2], "w");
     if (input == NULL || output == NULL) {
-        perror("Error opening files");
+        printf("Erro na leitura");
         return 1;
     }
     printf("Opened files: %s / %s", argv[1], argv[2]);
