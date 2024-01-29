@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #define CODE_SIZE 12
 #define CNPJ_SIZE 18
@@ -10,267 +11,258 @@ typedef struct {
     int weight;
 } Container;
 
-typedef struct {
+typedef struct{
     char code[CODE_SIZE];
     int diff;
     int percent;
-}Weight_error;
+} Erro_peso;
 
-int my_round(float x) {
-    return (int)(x + 0.5);
+// Round float number to nearest integer
+int my_round(float x){
+    return (int)(x+0.5);
 }
-
-char *copy_string(char *dest, char *src) {
+// Copy string to another place OK
+char *copy_string(char *dest, char *src){
     char *original_dest = dest;
-    while ((*dest++ = *src++) != '\0');
+    while (((*dest++ = *src++) != '\0'));
     return original_dest;
 }
-
+// Compare strings OK
+// return different from 0 means that strings are different
 int compare_strings(const char *s1, const char *s2) {
     while (*s1 != '\0' && *s2 != '\0' && *s1 == *s2) {
         s1++;
         s2++;
     }
-    return (*s1 - *s2);
+
+    if (*s1 == *s2) {
+        return 0;  // Strings are equal
+    } else if (*s1 < *s2) {
+        return -1; // s1 is less than s2
+    } else {
+        return 1;  // s1 is greater than s2
+    }
 }
 
-int read_number(FILE *file) {
+// return number read from arg file OK
+int read_number(FILE *file){
     int x;
-    fscanf(file, "%d", &x);
+    (void)fscanf(file, "%d", &x);
     return x;
 }
-
-void fillContainers(FILE *file, Container *cont, int n) {
-    for (int i = 0; i < n; i++) {
-        fscanf(file, "%s %s %d", cont[i].code, cont[i].cnpj, &cont[i].weight);
-    }
+// Fill 2 containers arrays with data from file OK
+void fill_containers(FILE *file, Container *c1, int n){
+    for(int i = 0; i < n; i++) (void)fscanf(file, "%s %s %d", c1[i].code, c1[i].cnpj, &c1[i].weight);
 }
-
-void merge(Container *arr, int left, int mid, int right) {
+// Merge Containers array OK
+void merge_container(Container *arr, int l, int m, int r){
     int i, j, k;
-    int n1 = mid - left + 1;
-    int n2 = right - mid;
+    int n1 = m - l + 1;
+    int n2 = r - m;
 
-    Container L[n1], R[n2];
+    Container *larr = malloc(n1*sizeof(Container));
+    Container *rarr = malloc(n2*sizeof(Container));
 
-    for (i = 0; i < n1; i++) {
-        for (int c = 0; c < CODE_SIZE; c++) {
-            L[i].code[c] = arr[left + i].code[c];
-        }
-        for (int c = 0; c < CNPJ_SIZE; c++) {
-            L[i].cnpj[c] = arr[left + i].cnpj[c];
-        }
-        L[i].weight = arr[left + i].weight;
-    }
-    for (j = 0; j < n2; j++) {
-        for (int c = 0; c < CODE_SIZE; c++) {
-            R[j].code[c] = arr[mid + 1 + j].code[c];
-        }
-        for (int c = 0; c < CNPJ_SIZE; c++) {
-            R[j].cnpj[c] = arr[mid + 1 + j].cnpj[c];
-        }
-        R[j].weight = arr[mid + 1 + j].weight;
-    }
-
-    i = 0;
-    j = 0;
-    k = left;
-    while (i < n1 && j < n2) {
-        int compareResult = 0;
-        for (int c = 0; c < CODE_SIZE; c++) {
-            if (L[i].code[c] < R[j].code[c]) {
-                compareResult = -1;
-                break;
-            } else if (L[i].code[c] > R[j].code[c]) {
-                compareResult = 1;
-                break;
-            }
-        }
-
-        if (compareResult <= 0) {
-            for (int c = 0; c < CODE_SIZE; c++) {
-                arr[k].code[c] = L[i].code[c];
-            }
-            for (int c = 0; c < CNPJ_SIZE; c++) {
-                arr[k].cnpj[c] = L[i].cnpj[c];
-            }
-            arr[k].weight = L[i].weight;
-            i++;
-        } else {
-            for (int c = 0; c < CODE_SIZE; c++) {
-                arr[k].code[c] = R[j].code[c];
-            }
-            for (int c = 0; c < CNPJ_SIZE; c++) {
-                arr[k].cnpj[c] = R[j].cnpj[c];
-            }
-            arr[k].weight = R[j].weight;
-            j++;
-        }
-        k++;
-    }
-
-    while (i < n1) {
-        for (int c = 0; c < CODE_SIZE; c++) {
-            arr[k].code[c] = L[i].code[c];
-        }
-        for (int c = 0; c < CNPJ_SIZE; c++) {
-            arr[k].cnpj[c] = L[i].cnpj[c];
-        }
-        arr[k].weight = L[i].weight;
-        i++;
-        k++;
-    }
-
-    while (j < n2) {
-        for (int c = 0; c < CODE_SIZE; c++) {
-            arr[k].code[c] = R[j].code[c];
-        }
-        for (int c = 0; c < CNPJ_SIZE; c++) {
-            arr[k].cnpj[c] = R[j].cnpj[c];
-        }
-        arr[k].weight = R[j].weight;
-        j++;
-        k++;
-    }
-}
-
-void mergeSort(Container *arr, int left, int right) {
-    if (left < right) {
-        int mid = left + (right - left) / 2;
-        mergeSort(arr, left, mid);
-        mergeSort(arr, mid + 1, right);
-        merge(arr, left, mid, right);
-    }
-}
-
-void merge2(Weight_error *arr, int left, int mid, int right) {
-    int i, j, k;
-    int n1 = mid - left + 1;
-    int n2 = right - mid;
-
-    Weight_error L[n1], R[n2];
-
-    
-    for (i = 0; i < n1; i++) {
-        L[i] = arr[left + i];
-    }
-    for (j = 0; j < n2; j++) {
-        R[j] = arr[mid + 1 + j];
-    }
-
+    for(i = 0; i < n1; i++) larr[i] = arr[l+i];
+    for(j = 0; j < n2; j++) rarr[j] = arr[m + 1 + j];
     
     i = 0;
     j = 0;
-    k = left;
-    while (i < n1 && j < n2) {
-        if (L[i].percent >= R[j].percent) {
-            arr[k] = L[j];
-            j++;
-        } else {
-            arr[k] = R[i];
+    k = l;
+
+    while (i < n1 && j < n2){
+        if(compare_strings(larr[i].code, rarr[j].code) <= 0){
+            arr[k] = larr[i];
             i++;
         }
+        else{
+            arr[k] = rarr[j];
+            j++;
+        } 
         k++;
     }
 
-    
-    while (i < n1) {
-        arr[k] = L[i];
+    while(i < n1){
+        arr[k] = larr[i];
+        k++;
         i++;
+    } 
+    while (j < n2){
+        arr[k] = rarr[j];
         k++;
-    }
-
-    
-    while (j < n2) {
-        arr[k] = R[j];
         j++;
-        k++;
+    } 
+
+    free(larr);
+    free(rarr);
+}
+// Sort Containers array
+void merge_sort_container(Container *arr, int l, int r){
+    if (l < r){
+        int m = l + (r - l) / 2;
+
+        merge_sort_container(arr, l, m);
+        merge_sort_container(arr, m+1,r);
+
+        merge_container(arr, l, m, r);
     }
 }
-
-void mergeSort2(Weight_error *arr, int left, int right) {
-    if (left < right) {
-        int mid = left + (right - left) / 2;
-        mergeSort2(arr, left, mid);
-        mergeSort2(arr, mid + 1, right);
-        merge2(arr, left, mid, right);
-    }
-}
-
-
-
-int binarySearch(Container *c, int low, int high, const char *code) {
-    while (low <= high) {
+// Search container code in array
+int binary_search(Container *c, int low, int high, const char *code){
+    while (low <= high){
         int mid = low + (high - low) / 2;
-        int comparing = compare_strings(c[mid].code, code);
-        if (comparing == 0)
-            return mid;
-        else if (comparing < 0)
-            low = mid + 1;
-        else
-            high = mid - 1;
+        int compare = compare_strings(c[mid].code, code);
+        if(compare == 0) return mid;
+        else if (compare == 1) high = mid - 1;
+        else low = mid + 1;
     }
     return -1;
 }
 
 
+void merge_peso(Erro_peso *arr, int l, int m, int r){
+    int i, j, k;
+    int n1 = m - l + 1;
+    int n2 = r - m;
+
+    Erro_peso *larr = malloc(n1 * sizeof(Erro_peso));
+    Erro_peso *rarr = malloc(n2 * sizeof(Erro_peso));
+
+    for (i = 0; i < n1; i++)
+        larr[i] = arr[l + i];
+    for (j = 0; j < n2; j++)
+        rarr[j] = arr[m + 1 + j];
+
+    i = 0;
+    j = 0;
+    k = l;
+
+    while (i < n1 && j < n2) {
+        if (larr[i].percent >= rarr[j].percent) {
+            arr[k] = larr[i];
+            i++;
+        } else {
+            arr[k] = rarr[j];
+            j++;
+        }
+        k++;
+    }
+
+    while (i < n1) {
+        arr[k] = larr[i];
+        k++;
+        i++;
+    }
+
+    while (j < n2) {
+        arr[k] = rarr[j];
+        k++;
+        j++;
+    }
+
+    free(larr);
+    free(rarr);
+
+}
+
+void merge_sort_peso(Erro_peso *arr, int l, int r) {
+    if (l < r) {
+        int m = l + (r - l) / 2;
+
+        merge_sort_peso(arr, l, m);
+        merge_sort_peso(arr, m + 1, r);
+
+        merge_peso(arr, l, m, r);
+    }
+}
+
+void print_container_array(Container *a, int size){
+    for(int i = 0; i < size; i++) printf("%s :::: %s ::::: %d\n", a[i].code, a[i].cnpj, a[i].weight);
+    printf("\n");
+}
+
+// Judge if there is some error between 2 given containers
+// args -> c2 is the new container, c1 is the source container
 int define_error(Container c1, Container c2, int *percent, int *diff){
     if(compare_strings(c1.cnpj, c2.cnpj) != 0) return 0;
-    *diff = c1.weight - c2.weight;
-    *diff = *diff < 0 ? (-*diff):*diff;
+    *diff = abs(c1.weight - c2.weight);
+
+    // Imprimir a operação
+    // printf("%d / %d * 100 = ", *diff, c1.weight);
+
     *percent = my_round(((float)*diff / (float)c1.weight) * 100);
+
+    // Imprimir o resultado
+    // printf("%d\n", *percent);
+
     if (*percent > 10) return 1;
-    return 2;
+    return -1;
 }
 
-void search_container(Container *c1, int n1, Container *c2, int n2, FILE *output, Weight_error *q) {
-    int percent, diff;
-    int w_index = 0;
-    for (int i = 0; i < n1; i++) {
-        char *code = c1[i].code;
-        int index = binarySearch(c2, 0, n2 - 1, code);
-        if (index != -1){
-            int error_code = define_error(c1[i], c2[index], &percent, &diff);
-            if(error_code == 0) fprintf(output, "%s: %s<->%s\n", c1[i].code, c1[i].cnpj, c2[index].cnpj);
-            if(error_code == 1) {
-                copy_string(q[w_index].code, code);
-                q[w_index].percent = percent;
-                q[w_index].diff = diff;
-                w_index++;
-            }
+// Search c2 container in c1 array
+void search_container(Container *c1, int n1, Container *c2, int n2, FILE *output, Erro_peso *q){
+    int percent, diff, q_index = 0;
+    char *code = NULL;
+    for(int i = 0; i < n1; i++){
+        code = c1[i].code;
+        
+        int c2_index = binary_search(c2, 0, n2 - 1, code);
+        if (c2_index == -1) continue;
+        int error_code = define_error(c1[i], c2[c2_index], &percent, &diff);
+        if(error_code == 0) fprintf(output, "%s: %s<->%s\n", c2[c2_index].code, c1[i].cnpj, c2[c2_index].cnpj);
+        if (error_code == 1){
+            copy_string(q[q_index].code, code);
+            q[q_index].percent = percent;
+            q[q_index].diff = diff;
+            q_index++;
         }
-
     }
 }
 
-int main(int argc, char *argv[]) {
+void print_erros_peso(FILE *output, Erro_peso *erros_peso, int size) {
+    for (int i = 0; i < size; i++) {
+        if(erros_peso[i].percent != 0){
+            fprintf(output, "%s: %dkg (%d%%)\n", erros_peso[i].code, erros_peso[i].diff, erros_peso[i].percent);
+        }
+        
+    }
+}
+int main(int argc, char *argv[]){
+    printf("Started!\n");
+    // FIle opening
     FILE *input = fopen(argv[1], "r");
     FILE *output = fopen(argv[2], "w");
-
-    int size_1 = read_number(input);
-    Container container_1[size_1];
-    fillContainers(input, container_1, size_1);
-
-    int size_2 = read_number(input);
-    Container container_2[size_2];
-    fillContainers(input, container_2, size_2);
-
-    mergeSort(container_2, 0, size_2 - 1);
-
-    Weight_error w_q[size_2];
-    for (int i = 0; i < size_2; i++) {
-    w_q[i].percent = 0;
-}
-
-    search_container(container_1, size_1, container_2, size_2, output, w_q);
-    mergeSort2(w_q, 0, size_2-1);
-    for (int i = 0; i < size_2; i++) {
-        if (w_q[i].percent > 10) {
-            fprintf(output, "%s: %dkg (%d%%)\n", w_q[i].code, w_q[i].diff, w_q[i].percent);
-        }
+    if (input == NULL || output == NULL) {
+        printf("Erro na leitura\n");
+        return 1;
     }
+    printf("Opened files: %s / %s\n", argv[1], argv[2]);
+    
+    // Container 1 array definition
+    int size_c1 = read_number(input);
+    Container c1[size_c1];
+    fill_containers(input, c1, size_c1);
+    printf("Create Container 1.\n");
+
+    // Container 2 definition and sorting
+    int size_c2 = read_number(input);
+    Container c2[size_c2];
+    fill_containers(input, c2, size_c2);
+    printf("Create Container 2.\n");
+    merge_sort_container(c2, 0, size_c2-1);
+    printf("Sorted the Container 2\n");
+    
+    // print_container_array(c1, size_c1);
+    // print_container_array(c2, size_c2);
+    
+    Erro_peso peso_q[size_c2];
+    for(int i = 0; i < size_c2; i++) peso_q[i].percent = 0;
+    printf("Create and initialize the peso array.\n");
+    
+    search_container(c1, size_c1, c2, size_c2, output, peso_q);
+    merge_sort_peso(peso_q, 0, size_c2 - 1);
+    print_erros_peso(output, peso_q, size_c2-1);
     fclose(input);
     fclose(output);
-
     return 0;
-}
+} 
