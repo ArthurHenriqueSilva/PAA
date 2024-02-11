@@ -48,16 +48,9 @@ void print_pacote(Pacote p);
 int my_round(float x);
 
 int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        printf("Usage: %s <input_file>\n", argv[0]);
-        return 1;
-    }
 
     FILE *input = fopen(argv[1], "r");
-    if (!input) {
-        printf("Error: Could not open input file %s\n", argv[1]);
-        return 1;
-    }
+
 
     int number_v = read_number(input);
     Veiculo *veiculos = malloc(number_v * sizeof(Veiculo));
