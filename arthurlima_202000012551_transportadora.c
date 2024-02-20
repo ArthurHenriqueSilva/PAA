@@ -1,12 +1,14 @@
+// Includes de bibliotecas necessárias
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-
+// Definição de constantes
 #define MAX_PLATE_LENGTH 9
 #define MAX_CODE_LENGTH 13
 #define MAX_WEIGHT 999999
 
+// Definição das estruturas de dados
 typedef struct {
     char placa[MAX_PLATE_LENGTH];
     int peso;
@@ -37,45 +39,59 @@ typedef struct {
     int num_pacotes; // Número de pacotes alocados
 } Alocacao;
 
+// Protótipos de funções
 int max(int a, int b);
 Alocacao alocar_pacotes(Veiculo veiculo, Pacote pacotes[], int num_pacotes);
-void print_alocacao(Alocacao a);
+void print_alocacao(FILE *output, Alocacao a);
 int read_number(FILE *input);
 Veiculo read_veiculo(FILE *input);
 Pacote read_pacote(FILE *input);
-void print_veiculo(Veiculo v);
-void print_pacote(Pacote p);
+void print_veiculo(FILE *output, Veiculo v);
+void print_pacote(FILE *output, Pacote p);
 int my_round(float x);
 
+// Função principal
 int main(int argc, char *argv[]) {
 
+    // Abertura do arquivo de entrada
     FILE *input = fopen(argv[1], "r");
+    FILE *output = fopen(argv[2], "w");
+    printf("Opened files: %s / %s\n", argv[1], argv[2]);
 
-
+    // Leitura do número de veículos
     int number_v = read_number(input);
+    printf("Total de %d veiculos.\n", number_v);
+
+    // Alocação de memória para os veículos
     Veiculo *veiculos = malloc(number_v * sizeof(Veiculo));
+    // Leitura dos veículos
     for (int i = 0; i < number_v; i++)
         veiculos[i] = read_veiculo(input);
+
+    // Leitura do número de pacotes
     int number_p = read_number(input);
+    printf("Total de %d pacotes.\n", number_p);
+    // Alocação de memória para os pacotes
     Pacote *pacotes = malloc(number_p * sizeof(Pacote));
+    // Leitura dos pacotes
     for (int i = 0; i < number_p; i++)
         pacotes[i] = read_pacote(input);
 
+    // Fechamento do arquivo de entrada
     fclose(input);
 
-    // Apply the alocar_pacotes algorithm for each vehicle
+    // Aplicação do algoritmo alocar_pacotes para cada veículo
     for (int i = 0; i < number_v; i++) {
         Alocacao a = alocar_pacotes(veiculos[i], pacotes, number_p);
-        print_alocacao(a);
-        printf("\n");
+        print_alocacao(output, a);
+        fprintf(output, "\n");
     }
 
-    // Verificar pacotes pendentes
-    
+    // Verificação de pacotes pendentes
     int weight_pendente = 0;
     int volume_pendente = 0;
     float valor_pendente = 0.0;
-    printf("[PENDENTE]");
+    fprintf(output, "[PENDENTE]");
     for (int i = 0; i < number_p; i++) {
         if (!pacotes[i].usado) {
             weight_pendente += pacotes[i].peso;
@@ -83,24 +99,33 @@ int main(int argc, char *argv[]) {
             valor_pendente += pacotes[i].valor;
         }
     }
-    printf("%.2fR$, ", valor_pendente);
-    printf("%dkg, ", weight_pendente);
-    printf("%dL\n", volume_pendente);
+    fprintf(output, "%.2fR$, ", valor_pendente);
+    fprintf(output, "%dkg, ", weight_pendente);
+    fprintf(output, "%dL\n", volume_pendente);
 
+    // Impressão dos códigos dos pacotes pendentes
     for(int i = 0; i < number_p; i++){
-        if (!pacotes[i].usado) printf("%s\n", pacotes[i].codigo);
+        if (!pacotes[i].usado) fprintf(output, "%s\n", pacotes[i].codigo);
     } 
+
+    // Liberação de memória alocada
     free(veiculos);
     free(pacotes);
+
+    // Fechamento do arquivo de saída
+    fclose(output);
 
     return 0;
 }
 
+// Função de comparação para o máximo entre dois números
 int max(int a, int b) {
     return (a > b) ? a : b;    
 }
 
+// Função para alocação de pacotes em um veículo
 Alocacao alocar_pacotes(Veiculo veiculo, Pacote pacotes[], int num_pacotes) {
+    // Inicialização de variáveis
     int W = veiculo.peso; // Peso máximo do veículo
     int V = veiculo.volume; // Volume máximo do veículo
     int n = num_pacotes;
@@ -126,7 +151,9 @@ Alocacao alocar_pacotes(Veiculo veiculo, Pacote pacotes[], int num_pacotes) {
         }
     }
 
-    float res = k[n][W][V]; // Valor máximo que pode ser levado pelo veículo
+    // Cálculo do valor máximo que pode ser levado pelo veículo
+    float res = k[n][W][V];
+    // Inicialização da estrutura de alocação
     Alocacao a;
     strcpy(a.placa, veiculo.placa);
     a.valor = res;
@@ -137,7 +164,9 @@ Alocacao alocar_pacotes(Veiculo veiculo, Pacote pacotes[], int num_pacotes) {
     a.num_pacotes = 0;
     a.pacotes = NULL;
 
+    // Variável auxiliar para percorrer a lista de pacotes alocados
     Node *current = NULL;
+    // Loop para determinar os pacotes alocados
     for (int i = n, w = veiculo.peso, v = veiculo.volume; i > 0 && res > 0; i--) {
         if (res != k[i-1][w][v] && pacotes[i-1].peso <= w && pacotes[i-1].volume <= v && !pacotes[i-1].usado) {
             Node *new_node = malloc(sizeof(Node));
@@ -160,7 +189,7 @@ Alocacao alocar_pacotes(Veiculo veiculo, Pacote pacotes[], int num_pacotes) {
         }
     }
 
-    // Liberação de memória
+    // Liberação de memória alocada para a matriz auxiliar
     for (int i = 0; i <= n; i++) {
         for (int j = 0; j <= W; j++) {
             free(k[i][j]);
@@ -172,35 +201,41 @@ Alocacao alocar_pacotes(Veiculo veiculo, Pacote pacotes[], int num_pacotes) {
     return a;
 }
 
-void print_alocacao(Alocacao a) {
-    printf("[%s] ", a.placa);
-    printf("%.2fR$, ", a.valor);
+// Função para imprimir informações de alocação
+void print_alocacao(FILE *output, Alocacao a) {
+    fprintf(output, "[%s] ", a.placa);
+    fprintf(output, "%.2fR$, ", a.valor);
     
+    // Cálculo da porcentagem de peso e volume alocados
     int peso_percent = (int)my_round(((float)a.peso_total / a.peso_maximo) * 100);
     int volume_percent = (int)my_round(((float)a.volume_total / a.volume_maximo) * 100);
 
-    printf("%dkg(%d%%), ", a.peso_total, peso_percent);
-    printf("%dL (%d%%)\n", a.volume_total, volume_percent);
+    fprintf(output, "%dkg(%d%%), ", a.peso_total, peso_percent);
+    fprintf(output, "%dL (%d%%)\n", a.volume_total, volume_percent);
     
+    // Impressão dos códigos dos pacotes alocados
     Node *current = a.pacotes;
     while (current != NULL) {
-        printf("%s\n", current->codigo);
+        fprintf(output, "%s\n", current->codigo);
         current = current->next;
     }
 }
 
+// Função para ler um número do arquivo de entrada
 int read_number(FILE *input) {
     int number;
     fscanf(input, "%d", &number);
     return number;
 }
 
+// Função para ler um veículo do arquivo de entrada
 Veiculo read_veiculo(FILE *input) {
     Veiculo veiculo;
     fscanf(input, "%s %d %d", veiculo.placa, &veiculo.peso, &veiculo.volume);
     return veiculo;
 }
 
+// Função para ler um pacote do arquivo de entrada
 Pacote read_pacote(FILE *input) {
     Pacote pacote;
     fscanf(input, "%s %f %d %d", pacote.codigo, &pacote.valor, &pacote.peso, &pacote.volume);
@@ -208,14 +243,17 @@ Pacote read_pacote(FILE *input) {
     return pacote;
 }
 
-void print_veiculo(Veiculo v) {
-    printf("[%s] %dkg %dL\n", v.placa, v.peso, v.volume);
+// Função para imprimir informações de um veículo
+void print_veiculo(FILE *output, Veiculo v) {
+    fprintf(output, "[%s] %dkg %dL\n", v.placa, v.peso, v.volume);
 }
 
-void print_pacote(Pacote p) {
-    printf("  [%s] %dkg %dL %.2fR$\n", p.codigo, p.peso, p.volume, p.valor);
+// Função para imprimir informações de um pacote
+void print_pacote(FILE *output, Pacote p) {
+    fprintf(output, "  [%s] %dkg %dL %.2fR$\n", p.codigo, p.peso, p.volume, p.valor);
 }
 
+// Função para arredondar um número float para o inteiro mais próximo
 int my_round(float x){
     return (int)(x+0.5);
 }
