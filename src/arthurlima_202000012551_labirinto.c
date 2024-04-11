@@ -11,21 +11,6 @@ typedef struct position{
     int height;
 }position;
 
-void header(){
-    printf("\n");
-    printf("\n");
-    printf("\n");
-    printf("\n");
-    printf("    dMMMMb  .aMMMb  dMP dMP dMP dMMMMMMMMb      dMMMMMMP dMMMMMP .aMMMb  dMP dMP\n");
-    printf("   dMP.dMP dMP dMP dMK.dMP amr dMP dMP dMP        dMP   dMP     dMP VMP dMP dMP \n");
-    printf("  dMMMMP  dMP dMP .dMMMKK dMP dMP dMP dMP        dMP   dMMMP   dMP     dMMMMMP  \n");
-    printf(" dMP     dMP.aMP dMP AMF dMP dMP dMP dMP        dMP   dMP     dMP.aMP dMP dMP   \n");
-    printf("dMP      VMMMP  dMP dMP dMP dMP dMP dMP        dMP   dMMMMMP  VMMMP  dMP dMP    \n");
-    printf("================================================================================\n");
-    printf("\n");
-    printf("================================================================================\n");
-
-}
 
 void verifyArgs(char **argv){
     if(argv[1] == NULL || argv[2]== NULL){
@@ -41,7 +26,6 @@ void printSeparator(){
 //Main method, requires 2 files as args to run.
 int main(int argc, char **argv){
 
-    header();
     
     //Verifying if there is two arguments.
     verifyArgs(argv);
@@ -97,24 +81,24 @@ int main(int argc, char **argv){
                     start.width = k;
                     start.height = j;
                     //labyrinth[j][k] = '0';
-                    printf("%c ",labyrinth[j][k]);
+                    // printf("%c ",labyrinth[j][k]);
                 }else{
-                    printf("%c ",labyrinth[j][k]);
+                    // printf("%c ",labyrinth[j][k]);
                 }
 
             }
             printf("\n");
         }
         printSeparator();
-        printf("first position height: %d \n",start.height);
-        printf("first position width: %d \n",start.width);
+        // printf("first position height: %d \n",start.height);
+        // printf("first position width: %d \n",start.width);
         printSeparator();
-        printf("Placing robot at w:%d h:%d \n",start.width, start.height);
-        fprintf(fp2, "INICIO@%d,%d\n", start.height, start.width);
+        // printf("Placing robot at w:%d h:%d \n",start.width, start.height);
+        // fprintf(fp2, "INICIO@%d,%d\n", start.height, start.width);
         position robot;
         robot.width = start.width;
         robot.height = start.height;
-        printf("Robot placed at w:%d h:%d \n", robot.width, robot.height);
+        // printf("Robot placed at w:%d h:%d \n", robot.width, robot.height);
         printSeparator();
 
         position previous;
@@ -139,7 +123,7 @@ int main(int argc, char **argv){
                 steps2++;
                 
                 fprintf(fp2, "D [%i,%i]->[%i,%i]\n",robot.height,robot.width,robot.height,robot.width+1);
-                printf("D [%i,%i]->[%i,%i]\n",robot.height,robot.width,robot.height,robot.width+1);
+                // printf("D [%i,%i]->[%i,%i]\n",robot.height,robot.width,robot.height,robot.width+1);
                 
                 previous.height = robot.height;
                 previous.width = robot.width;
@@ -158,7 +142,7 @@ int main(int argc, char **argv){
                 steps2++;
 
                 fprintf(fp2, "F@%i,%i->[%i,%i]\n",robot.height,robot.width,robot.height-1,robot.width);
-                printf("F [%i,%i]->[%i,%i]\n",robot.height,robot.width,robot.height-1,robot.width);
+                // printf("F [%i,%i]->[%i,%i]\n",robot.height,robot.width,robot.height-1,robot.width);
                 
                 previous.height = robot.height;
                 previous.width = robot.width;
@@ -176,7 +160,7 @@ int main(int argc, char **argv){
                 steps2++;
 
                 fprintf(fp2, "E@%i,%i->[%i,%i]\n",robot.height,robot.width,robot.height,robot.width-1);
-                printf("E [%i,%i]->[%i,%i]\n",robot.height,robot.width,robot.height,robot.width-1);
+                // printf("E [%i,%i]->[%i,%i]\n",robot.height,robot.width,robot.height,robot.width-1);
 
                 previous.height = robot.height;
                 previous.width = robot.width;
@@ -194,7 +178,7 @@ int main(int argc, char **argv){
                 steps2++;
                 
                 fprintf(fp2, "T@%i,%i->[%i,%i]\n",robot.height,robot.width,robot.height+1,robot.width);
-                printf("T [%i,%i]->[%i,%i]\n",robot.height,robot.width,robot.height+1,robot.width);
+                // printf("T [%i,%i]->[%i,%i]\n",robot.height,robot.width,robot.height+1,robot.width);
                 
                 previous.height = robot.height;
                 previous.width = robot.width;
@@ -210,7 +194,7 @@ int main(int argc, char **argv){
                     break;
                 } else{
                     fprintf(fp2, "BT@%i,%i<-[%i,%i]\n",previous.height,previous.width, robot.height,robot.width);
-                    printf("BT [%i,%i]<-[%i,%i]\n",previous.height,previous.width, robot.height,robot.width);
+                    // printf("BT [%i,%i]<-[%i,%i]\n",previous.height,previous.width, robot.height,robot.width);
                 }
                 
                 labyrinth[robot.height][robot.width] = '1';
@@ -233,13 +217,13 @@ int main(int argc, char **argv){
         if (steps2 == 0){
 
         } else if(end.height == -1 || end.width == -1){
-            printf( "SEM SAIDA\n");
-            printf( "  steps: %d\n", steps);
-            printf( "  steps2: %d\n", steps2);
+            // printf( "SEM SAIDA\n");
+            // printf( "  steps: %d\n", steps);
+            // printf( "  steps2: %d\n", steps2);
             fprintf(fp2, "SEM SAIDA\n");
 
         } else {
-            printf( "SAIDA [%i,%i]\n",end.height,end.width);
+            // printf( "SAIDA [%i,%i]\n",end.height,end.width);
             fprintf(fp2, "SAIDA@%i,%i\n",end.height,end.width);
         }
     }
