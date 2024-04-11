@@ -87,7 +87,7 @@ int main(int argc, char **argv){
                 }
 
             }
-            printf("\n");
+            // printf("\n");
         }
         printSeparator();
         // printf("first position height: %d \n",start.height);
@@ -122,7 +122,7 @@ int main(int argc, char **argv){
                 steps++;
                 steps2++;
                 
-                fprintf(fp2, "D [%i,%i]->[%i,%i]\n",robot.height,robot.width,robot.height,robot.width+1);
+                fprintf(fp2, "D@%i,%i->%i,%i\n",robot.height,robot.width,robot.height,robot.width+1);
                 // printf("D [%i,%i]->[%i,%i]\n",robot.height,robot.width,robot.height,robot.width+1);
                 
                 previous.height = robot.height;
@@ -141,7 +141,7 @@ int main(int argc, char **argv){
                 steps++;
                 steps2++;
 
-                fprintf(fp2, "F@%i,%i->[%i,%i]\n",robot.height,robot.width,robot.height-1,robot.width);
+                fprintf(fp2, "F@%i,%i->%i,%i\n",robot.height,robot.width,robot.height-1,robot.width);
                 // printf("F [%i,%i]->[%i,%i]\n",robot.height,robot.width,robot.height-1,robot.width);
                 
                 previous.height = robot.height;
@@ -159,7 +159,7 @@ int main(int argc, char **argv){
                 steps++;
                 steps2++;
 
-                fprintf(fp2, "E@%i,%i->[%i,%i]\n",robot.height,robot.width,robot.height,robot.width-1);
+                fprintf(fp2, "E@%i,%i->%i,%i\n",robot.height,robot.width,robot.height,robot.width-1);
                 // printf("E [%i,%i]->[%i,%i]\n",robot.height,robot.width,robot.height,robot.width-1);
 
                 previous.height = robot.height;
@@ -177,7 +177,7 @@ int main(int argc, char **argv){
                 steps++;
                 steps2++;
                 
-                fprintf(fp2, "T@%i,%i->[%i,%i]\n",robot.height,robot.width,robot.height+1,robot.width);
+                fprintf(fp2, "T@%i,%i->%i,%i\n",robot.height,robot.width,robot.height+1,robot.width);
                 // printf("T [%i,%i]->[%i,%i]\n",robot.height,robot.width,robot.height+1,robot.width);
                 
                 previous.height = robot.height;
@@ -193,7 +193,7 @@ int main(int argc, char **argv){
                 if(robot.height == start.height && robot.width == start.width){
                     break;
                 } else{
-                    fprintf(fp2, "BT@%i,%i<-[%i,%i]\n",previous.height,previous.width, robot.height,robot.width);
+                    fprintf(fp2, "BT@%i,%i<-%i,%i\n",previous.height,previous.width, robot.height,robot.width);
                     // printf("BT [%i,%i]<-[%i,%i]\n",previous.height,previous.width, robot.height,robot.width);
                 }
                 
